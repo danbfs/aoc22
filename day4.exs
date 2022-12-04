@@ -1,0 +1,43 @@
+defmodule Day4 do
+  def get_answers do
+    input = "2-4,6-8
+2-3,4-5
+5-7,7-9
+2-8,3-7
+6-6,4-6
+2-6,4-8"
+    elf_pairs = String.split(input, "\n")
+
+    get_section = fn elves, elf_index, section_index ->
+    Enum.at(elves, elf_index)
+      |> String.split("-")
+      |> Enum.at(section_index)
+      |> Integer.parse()
+    end
+
+    first_round = elf_pairs
+    |> Enum.count(fn x ->
+      elves = String.split(x, ",")
+      a = get_section.(elves, 0, 0)
+      b = get_section.(elves, 0, 1)
+      c = get_section.(elves, 1, 0)
+      d = get_section.(elves, 1, 1)
+      (a >= c and b <= d) or (c >= a and d <= b)
+    end)
+
+    second_round = elf_pairs
+    |> Enum.count(fn x ->
+      elves = String.split(x, ",")
+      a = get_section.(elves, 0, 0)
+      b = get_section.(elves, 0, 1)
+      c = get_section.(elves, 1, 0)
+      d = get_section.(elves, 1, 1)
+      ((a >= c and a <= d) or (b >= c and b <= d))
+      or ((c >= a and c <= b) or (d >= a and d <= b))
+    end)
+
+    {first_round, second_round}
+  end
+end
+
+Day4.get_answers()
