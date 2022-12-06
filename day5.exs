@@ -562,7 +562,7 @@ run_crane = fn inst, stacks ->
   {qt, from, to} = List.to_tuple(inst)
   new_to = Enum.at(stacks, from - 1)
   |> Enum.take(qt)
-  |> Enum.reverse
+  |> Enum.reverse # comment for second answer
   |> Enum.concat(Enum.at(stacks, to - 1))
 
   new_from = Enum.at(stacks, from - 1)
