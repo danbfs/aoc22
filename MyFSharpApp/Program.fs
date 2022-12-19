@@ -5,13 +5,13 @@
 35390"
 
 let rows = input.Split '\n'
-let columns = rows[0] |> String.mapi(fun i tree -> rows[i][0])
+let columns = rows |> Array.mapi(fun maini x -> x |> String.mapi(fun i tree -> rows[i][maini]))
 
 
-input.Split '\n'
+rows
 |> Array.mapi(fun maini x -> x |>
 String.mapi(fun i c ->
-if i = 0 or i = x.Length - 1 
+if i = 0 or i = x.Length - 1 or maini = 0 or maini = rows.Length - 1
 then c
 else System.Char.MinValue)
 )
