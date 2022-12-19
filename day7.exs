@@ -1,6 +1,6 @@
 defmodule Day7 do
-  def read_system do
-   input = "$ cd /
+  def main do
+    intermediary = "$ cd /
 $ ls
 dir jmtrrrp
 dir jssnn
@@ -1013,85 +1013,76 @@ $ cd ..
 $ cd vsztsjfh
 $ ls
 215479 ffwlcrwb"
-
-input
 |> String.split("\n")
-|> Enum.reduce(%{:cd => "", :dirs => %{}, :hier => %{}}, fn x, acc ->
-  cd = acc.cd
-  dirs = acc.dirs
-  hier = acc.hier
+|> Enum.reduce( %{:current_cd => nil}, fn x, acc ->
+  split = String.split(x, " ")
+  is_cd = String.starts_with?(x, "$") and Enum.at(split, 1) == "cd"
 
-  new_cd = if String.contains?(x, "cd") do
-    String.split(x, " ")
-    |> List.last
-  else cd
+  current_cd = cond do
+    is_cd and Enum.at(split, 2) !== ".." -> Enum.at(split, 2)
+    true -> acc.current_cd
   end
 
-  key = String.to_atom(new_cd)
-  new_hier = if String.starts_with?(x, "dir") do
-    dir = String.split(x, " ")
-    |> List.last
-    |> String.to_atom
-    if is_map(hier) and !Map.has_key?(hier, key) do
-      Map.put(hier, key, [dir])
-    else
-        %{hier | key => Map.get(hier, key) ++ [dir]}
-    end
-  else hier
+  item = cond do
+    Regex.match?(~r/^\d+$/, Enum.at(split, 0)) -> String.to_integer(Enum.at(split, 0))
+    Enum.at(split, 0) === "dir" -> Enum.at(split, 1)
+    true -> nil
   end
 
-  if new_cd == ".." do
-    %{:cd => cd, :dirs => dirs, :hier => new_hier}
-  else
+  is_listed = Map.has_key?(acc, current_cd)
 
-    new_dirs = if Map.has_key?(dirs, key) do
-      file = String.split(x, " ")
-      |> List.first
-      if String.match?(file, ~r/[0-9]+/) do
-         %{dirs | key => Map.get(dirs, key) ++ [String.to_integer(file)]}
-      else
-        dirs
-      end
-    else
-      Map.put(dirs, key, [])
-    end
+  IO.inspect([current_cd, item, x, Map.get(acc, current_cd)])
 
+  new = cond do
+    !is_listed -> Map.put(acc, current_cd, [size: 0, dirs: []])
+    !is_nil(item) and is_integer(item) -> Map.update!(acc, current_cd, &([size: &1[:size] + item, dirs: &1[:dirs]]))
+    !is_nil(item) -> Map.update!(acc, current_cd, &([size: &1[:size], dirs: &1[:dirs] ++ [item]]))
+    true -> acc
+  end
 
+  %{new | :current_cd => current_cd}
 
-  %{:cd => new_cd, :dirs => new_dirs, :hier => new_hier}
-end
 end)
+|> Map.delete(:current_cd)
 
-end
-
-  def recur(system, dir) do
-    if Map.has_key?(system.hier, dir) do
-      a = Map.get(system.hier, dir)
-      |> Enum.map(fn y -> recur(system, y) end)
-      |> Enum.sum
-      b = Enum.sum(Map.get(system.dirs, dir))
-      a + b
-    else
-      Enum.sum(Map.get(system.dirs, dir))
-    end
-  end
-
-  def recursive_sum(system) do
-    Map.keys(system.dirs)
-    |> Enum.map(fn dir ->
-      IO.inspect(dir)
-    {dir, recur(system, dir)}
-  end)
-
-  end
-
-end
-
-Day7.read_system
-|> Day7.recursive_sum
+breakers = Map.keys(intermediary)
 |> Enum.filter(fn x ->
-  size = elem(x, 1)
-  size <= 100_000
+  Map.get(intermediary, x)[:size] > 100_000
 end)
-|> Enum.map(fn y -> elem(y, 1) end)
-|> Enum.sum
+
+to_inspect = Map.keys(intermediary)
+
+
+[in: intermediary, fin: to_inspect, br: breakers]
+
+  end
+
+  def get_size(dir, intermediary, breakers) do
+
+    children = Map.get(intermediary, dir)[:dirs]
+
+    own_size = Map.get(intermediary, dir)[:size]
+
+
+  cond do
+    Enum.member?(breakers, dir) -> 100001
+    Enum.any?(children, fn x -> Enum.member?(breakers, x) end) -> 100001
+    own_size > 100_000 -> 100_001
+    length(children) == 0 -> own_size
+    true -> own_size + Enum.sum(Enum.map(children, fn y ->
+      get_size(y, intermediary, breakers)
+    end))
+  end
+end
+end
+
+
+[in: inte, fin: fin, br: br] = Day7.main()
+
+# IO.inspect(Enum.map(br, fn x -> Map.get(inte, x)[:size] end))
+# IO.inspect(fin)
+
+Enum.map(fin, fn dir ->
+  Day7.get_size(dir, inte, br) end)
+  |> Enum.filter(&(&1 <= 100000))
+  |> Enum.sum

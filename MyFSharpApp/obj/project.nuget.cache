@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "Hc4THTBE2FlKmcWZTnllcKGQ0Qsc4WoLPG4qHKLkHCYXbF8W42Phe+41zAa3fzZh5D7MqouCltbZwEZXOEpYJQ==",
+  "success": true,
+  "projectFilePath": "/Users/danbfs/nani/aoc22/MyFSharpApp/MyFSharpApp.fsproj",
+  "expectedPackageFiles": [
+    "/Users/danbfs/.nuget/packages/fsharp.core/6.0.7/fsharp.core.6.0.7.nupkg.sha512"
+  ],
+  "logs": []
+}
